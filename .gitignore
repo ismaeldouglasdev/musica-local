@@ -1,2 +1,8 @@
 __pycache__/
 *.pyc
+*.webm
+*.m4a
+*.mp4
+*.opus
+*.ogg
+*.mp3
