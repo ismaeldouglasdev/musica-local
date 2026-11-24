@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Música</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f8f63'/%3E%3Ctext x='32' y='45' font-size='36' text-anchor='middle' fill='white'%3E%E2%99%AA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="brand-icon">♪</span><span>Música</span></div>
+  <form id="searchForm" class="searchbox" autocomplete="off">
+    <input id="q" type="text" placeholder="Digite o nome da música ou do artista" aria-label="Buscar música">
+    <button type="submit" id="btnBuscar" class="primary">Buscar</button>
+  </form>
+  <button type="button" id="btnAjustes" class="icon-btn" title="Ajustes" aria-label="Ajustes">⚙</button>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button type="button" class="tab active" data-view="buscar">Buscar</button>
+  <button type="button" class="tab" data-view="baixadas">Baixadas <span class="badge" id="baixadasBadge">0</span></button>
+  <button type="button" class="tab" data-view="playlists">Playlists</button>
+  <button type="button" class="tab" data-view="fila">Fila <span class="badge" id="filaBadge">0</span></button>
+  <button type="button" class="tab" data-view="favoritos">Favoritos</button>
+  <button type="button" class="tab" data-view="historico">Histórico</button>
+</nav>
+
+<main>
+  <section class="view" id="view-buscar">
+    <p class="hint" id="hint">Digite o nome de uma música ou artista e aperte Buscar. Você também pode colar um link do YouTube.</p>
+    <div class="notice" id="notice" hidden></div>
+    <div class="reco" id="recoBox" hidden>
+      <div class="view-head">
+        <h2>Recomendadas para você</h2>
+        <button type="button" class="link" id="btnRecarregarReco" title="Buscar novas recomendações">↻ Atualizar</button>
+      </div>
+      <p class="hint" id="recoHint">Baseadas nas músicas que você ouviu.</p>
+      <div class="grid" id="recoGrid"></div>
+    </div>
+    <div class="grid" id="results"></div>
+    <div class="empty" id="emptyBusca" hidden>
+      <div class="empty-icon">♪</div>
+      <p><strong>Nenhuma música encontrada.</strong><br>Tente outro nome ou cole um link do YouTube.</p>
+    </div>
+  </section>
+
+  <section class="view" id="view-baixadas" hidden>
+    <div class="view-head">
+      <h2>Músicas baixadas</h2>
+      <button type="button" class="link" id="limparBaixadas">Limpar baixadas</button>
+    </div>
+    <p class="hint" id="baixadasInfo">Toque no botão ↓ de uma música para baixar. Elas ficam salvas aqui para ouvir offline.</p>
+    <div id="downloads" class="list"></div>
+    <div class="empty" id="emptyBaixadas">
+      <div class="empty-icon">↓</div>
+      <p><strong>Nenhuma música baixada ainda.</strong><br>Toque em uma música para baixar e ouvir offline.</p>
+    </div>
+  </section>
+
+  <section class="view" id="view-playlists" hidden>
+    <div id="playlistListView">
+      <div class="view-head">
+        <h2>Playlists</h2>
+        <button type="button" class="link" id="btnNovaPlaylist">＋ Nova playlist</button>
+      </div>
+      <p class="hint">Crie playlists para organizar suas músicas e baixar tudo de uma vez.</p>
+      <div id="playlists" class="list"></div>
+      <div class="empty" id="emptyPlaylists">
+        <div class="empty-icon">☰</div>
+        <p><strong>Nenhuma playlist ainda.</strong><br>Crie uma e adicione músicas pela busca.</p>
+      </div>
+    </div>
+
+    <div id="playlistDetailView" hidden>
+      <div class="view-head">
+        <button type="button" class="link" id="btnVoltarPlaylists">← Playlists</button>
+        <h2 id="playlistDetailName">Playlist</h2>
+        <span class="playlist-actions">
+          <button type="button" class="link" id="btnTocarPlaylist" title="Tocar todas">▶ Tocar tudo</button>
+          <button type="button" class="link" id="btnShufflePlaylist" title="Tocar em ordem aleatória">🔀 Aleatório</button>
+          <button type="button" class="link" id="btnBaixarPlaylist" title="Baixar músicas para Downloads/<playlist>">⬇ Baixar tudo</button>
+          <button type="button" class="link" id="btnAddPlaylist" title="Buscar músicas para adicionar">＋ Adicionar</button>
+          <button type="button" class="link danger-link" id="btnExcluirPlaylist" title="Excluir playlist">✕</button>
+        </span>
+      </div>
+      <p class="hint" id="playlistDetailInfo"></p>
+      <div id="playlistSongs" class="list"></div>
+      <div class="empty" id="emptyPlaylistSongs">
+        <p><strong>Playlist vazia.</strong><br>Use "+ Adicionar" e busque músicas para incluir aqui.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-fila" hidden>
+    <div class="view-head">
+      <h2>Sua fila</h2>
+      <button type="button" class="link" id="limparFila">Limpar fila</button>
+    </div>
+    <div id="queue" class="list"></div>
+    <div class="empty" id="emptyFila">
+      <div class="empty-icon">♪</div>
+      <p><strong>A fila está vazia.</strong><br>Busque uma música e toque nela.</p>
+    </div>
+  </section>
+
+  <section class="view" id="view-favoritos" hidden>
+    <div class="view-head">
+      <h2>Favoritos</h2>
+    </div>
+    <div id="favorites" class="list"></div>
+    <div class="empty" id="emptyFavoritos">
+      <div class="empty-icon">♥</div>
+      <p><strong>Nenhum favorito ainda.</strong><br>Toque no coração de uma música para guardar aqui.</p>
+    </div>
+  </section>
+
+  <section class="view" id="view-historico" hidden>
+    <div class="view-head">
+      <h2>Histórico</h2>
+      <button type="button" class="link" id="limparHistorico">Limpar histórico</button>
+    </div>
+    <div id="history" class="list"></div>
+    <div class="empty" id="emptyHistorico">
+      <div class="empty-icon">◷</div>
+      <p>As músicas que você ouvir aparecem aqui.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="player" id="player">
+  <div class="cover" id="cover"><span>♪</span></div>
+  <div class="now">
+    <div class="now-title" id="nowTitle">Nada tocando</div>
+    <div class="now-channel" id="nowChannel">Escolha uma música para começar</div>
+  </div>
+  <div class="controls">
+    <button type="button" id="btnPrev" class="icon-btn" title="Anterior" aria-label="Anterior">⏮</button>
+    <button type="button" id="btnPlay" class="play" title="Tocar ou pausar" aria-label="Tocar ou pausar">▶</button>
+    <button type="button" id="btnNext" class="icon-btn" title="Próxima" aria-label="Próxima">⏭</button>
+  </div>
+  <div class="progress">
+    <span id="curTime">0:00</span>
+    <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Progresso da música">
+    <span id="durTime">0:00</span>
+  </div>
+  <button type="button" id="btnFav" class="icon-btn fav-btn" title="Favoritar" aria-label="Favoritar">♡</button>
+  <button type="button" id="btnDl" class="icon-btn" title="Baixar música" aria-label="Baixar música"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+  <button type="button" id="btnPlAdd" class="icon-btn" title="Adicionar à playlist" aria-label="Adicionar à playlist">＋</button>
+  <div class="volume">
+    <span aria-hidden="true">🔊</span>
+    <input type="range" id="volume" min="0" max="100" value="80" aria-label="Volume">
+  </div>
+  <div class="loading" id="loading" hidden><span class="dot"></span> Baixando…</div>
+</footer>
+
+<audio id="audio" preload="metadata"></audio>
+
+<div class="modal-backdrop" id="modalBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Ajustes</h3>
+    <p class="modal-text" id="cacheInfo">Carregando…</p>
+    <div class="modal-actions">
+      <button type="button" id="btnLimparCache" class="danger">Limpar músicas baixadas</button>
+      <button type="button" id="btnAtualizar" class="secondary">Atualizar programa</button>
+      <button type="button" id="btnFecharAjustes" class="primary">Fechar</button>
+    </div>
+    <p class="modal-small">As músicas ficam salvas neste computador para tocar de novo sem esperar.</p>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="plPickerBackdrop" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="plPickerTitle">
+    <h3 id="plPickerTitle">Adicionar à playlist</h3>
+    <p class="modal-text" id="plPickerSong"></p>
+    <div class="pl-picker-list" id="plPickerList"></div>
+    <div class="modal-actions">
+      <button type="button" id="btnPlPickerNova" class="secondary">＋ Nova playlist</button>
+      <button type="button" id="btnFecharPlPicker" class="primary">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="sel-bar" id="selBar" hidden>
+  <span class="sel-count" id="selCount">0</span>
+  <button type="button" id="selTodas" title="Selecionar todas as visíveis">Todas</button>
+  <button type="button" id="selBaixar" title="Baixar selecionadas">⬇ Baixar</button>
+  <button type="button" id="selPlaylist" title="Adicionar selecionadas a uma playlist">＋ Playlist</button>
+  <button type="button" id="selFila" title="Adicionar selecionadas à fila">+ Fila</button>
+  <button type="button" id="selLimpar" class="sel-clear" title="Limpar seleção">✕</button>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
